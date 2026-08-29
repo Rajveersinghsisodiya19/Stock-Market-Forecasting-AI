@@ -1,5 +1,6 @@
 from twelvedata import TDClient
 import pandas as pd
+import numpy as np
 
 td = TDClient(apikey="5e2d32211d6b4d35a4aeb7324192bc4d")
 
@@ -76,5 +77,8 @@ df = pd.concat(
     ignore_index=True
 )
 
+df.to_csv("historical_data.csv", index=False)
 
-print(df.head())
+print("csv file created!!")
+
+
