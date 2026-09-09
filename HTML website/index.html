@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Market Prediction</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <span class="site-title">Stock Market Prediction</span>
+      <nav class="site-nav">
+        <a href="#predict-section">Predict</a>
+        <a href="#charts-section">Charts</a>
+        <a href="#results-section">Results</a>
+        <a href="#comparison-section">Comparison</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ============ INPUT SECTION ============ -->
+    <section id="predict-section" class="panel">
+      <h2 class="panel-title">Run a Prediction</h2>
+
+      <!--
+        FASTAPI INTEGRATION POINT:
+        Wire this form to POST to your backend, e.g. POST /api/predict
+        Body example: { "symbol": "AAPL", "horizon_days": 30 }
+        Suggested flow:
+          1. Prevent default form submission in JS.
+          2. Read values of #stock-symbol and #prediction-horizon.
+          3. fetch("http://localhost:8000/api/predict", { method: "POST", ... })
+          4. Use the JSON response to fill in the placeholder values in
+             the "SUMMARY BAR", "CHARTS SECTION", "RESULTS SECTION" and
+             "COMPARISON SECTION" below.
+      -->
+      <form id="prediction-form" class="input-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="stock-symbol">Stock Symbol</label>
+            <input
+              type="text"
+              id="stock-symbol"
+              name="symbol"
+              placeholder="e.g. AAPL"
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="prediction-horizon">Predict How Many Days Ahead</label>
+            <select id="prediction-horizon" name="horizon_days" required>
+              <option value="" disabled selected>Select timeframe</option>
+              <option value="1">1 day</option>
+              <option value="30">30 days</option>
+              <option value="60">60 days</option>
+              <option value="100">100 days</option>
+            </select>
+          </div>
+
+          <div class="form-field form-field-button">
+            <button type="submit" id="predict-btn" class="btn-primary">Predict</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ CURRENT PRICE / HORIZON SUMMARY ============ -->
+    <section class="summary-bar">
+      <div class="summary-item">
+        <span class="summary-label">Symbol</span>
+        <!-- FASTAPI: replace with response.symbol -->
+        <span class="summary-value" id="summary-symbol">--</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Current / Latest Price</span>
+        <!-- FASTAPI: replace with response.current_price -->
+        <span class="summary-value" id="summary-current-price">--</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Forecast Horizon</span>
+        <!-- FASTAPI: replace with e.g. "30 days" built from response.horizon_days -->
+        <span class="summary-value" id="summary-horizon">--</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Target Date</span>
+        <!-- FASTAPI: replace with response.target_date (today + horizon_days) -->
+        <span class="summary-value" id="summary-target-date">--</span>
+      </div>
+    </section>
+
+    <!-- ============ PRICE CHARTS SECTION ============ -->
+    <section id="charts-section" class="panel">
+      <h2 class="panel-title">Price Charts</h2>
+
+      <!--
+        FASTAPI INTEGRATION POINT:
+        Each SVG below is an empty chart frame (axes + grid only, no
+        invented data). Once your backend returns historical prices and
+        a model's predicted point for the selected horizon, draw them in
+        JS, e.g.:
+          1. Fetch response.history -> array of { date, price }
+          2. Fetch response.<model>.predicted_price for the target date
+          3. Map each price to an (x, y) coordinate inside the chart's
+             viewBox (0 0 800 260, plot area roughly x:50-780, y:20-200).
+          4. Build a <polyline points="x1,y1 x2,y2 ..."> for the
+             historical line, ending in a <circle> at the predicted point,
+             using the matching .line-rf/.point-rf (etc.) classes below.
+          5. Remove or hide the "chart-placeholder-msg" text group in that
+             chart once real data is drawn.
+      -->
+
+      <div class="chart-grid-3">
+
+        <!-- Random Forest chart -->
+        <div class="chart-card chart-card-rf">
+          <h3 class="chart-card-title">Random Forest</h3>
+          <svg class="price-chart" viewBox="0 0 800 260" role="img" aria-label="Random Forest price chart placeholder">
+            <g class="chart-grid-lines">
+              <line x1="50" y1="20" x2="50" y2="200" />
+              <line x1="50" y1="200" x2="780" y2="200" />
+              <line x1="50" y1="73" x2="780" y2="73" stroke-dasharray="4 4" />
+              <line x1="50" y1="126" x2="780" y2="126" stroke-dasharray="4 4" />
+              <line x1="50" y1="163" x2="780" y2="163" stroke-dasharray="4 4" />
+            </g>
+            <g class="chart-axis-labels">
+              <text x="40" y="24" text-anchor="end">High</text>
+              <text x="40" y="204" text-anchor="end">Low</text>
+              <text x="50" y="218">Today</text>
+              <text x="780" y="218" text-anchor="end">Target date</text>
+            </g>
+            <!-- FASTAPI: <polyline class="line-rf" points="..." /> -->
+            <!-- FASTAPI: <circle class="point-rf" cx="760" cy="90" r="5" /> -->
+            <g class="chart-placeholder-msg">
+              <text x="415" y="108" text-anchor="middle">No prediction data yet</text>
+              <text x="415" y="126" text-anchor="middle" class="chart-placeholder-sub">Run a prediction to see this chart</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- LSTM chart -->
+        <div class="chart-card chart-card-lstm">
+          <h3 class="chart-card-title">LSTM</h3>
+          <svg class="price-chart" viewBox="0 0 800 260" role="img" aria-label="LSTM price chart placeholder">
+            <g class="chart-grid-lines">
+              <line x1="50" y1="20" x2="50" y2="200" />
+              <line x1="50" y1="200" x2="780" y2="200" />
+              <line x1="50" y1="73" x2="780" y2="73" stroke-dasharray="4 4" />
+              <line x1="50" y1="126" x2="780" y2="126" stroke-dasharray="4 4" />
+              <line x1="50" y1="163" x2="780" y2="163" stroke-dasharray="4 4" />
+            </g>
+            <g class="chart-axis-labels">
+              <text x="40" y="24" text-anchor="end">High</text>
+              <text x="40" y="204" text-anchor="end">Low</text>
+              <text x="50" y="218">Today</text>
+              <text x="780" y="218" text-anchor="end">Target date</text>
+            </g>
+            <!-- FASTAPI: <polyline class="line-lstm" points="..." /> -->
+            <!-- FASTAPI: <circle class="point-lstm" cx="760" cy="90" r="5" /> -->
+            <g class="chart-placeholder-msg">
+              <text x="415" y="108" text-anchor="middle">No prediction data yet</text>
+              <text x="415" y="126" text-anchor="middle" class="chart-placeholder-sub">Run a prediction to see this chart</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- XGBoost chart -->
+        <div class="chart-card chart-card-xgb">
+          <h3 class="chart-card-title">XGBoost</h3>
+          <svg class="price-chart" viewBox="0 0 800 260" role="img" aria-label="XGBoost price chart placeholder">
+            <g class="chart-grid-lines">
+              <line x1="50" y1="20" x2="50" y2="200" />
+              <line x1="50" y1="200" x2="780" y2="200" />
+              <line x1="50" y1="73" x2="780" y2="73" stroke-dasharray="4 4" />
+              <line x1="50" y1="126" x2="780" y2="126" stroke-dasharray="4 4" />
+              <line x1="50" y1="163" x2="780" y2="163" stroke-dasharray="4 4" />
+            </g>
+            <g class="chart-axis-labels">
+              <text x="40" y="24" text-anchor="end">High</text>
+              <text x="40" y="204" text-anchor="end">Low</text>
+              <text x="50" y="218">Today</text>
+              <text x="780" y="218" text-anchor="end">Target date</text>
+            </g>
+            <!-- FASTAPI: <polyline class="line-xgb" points="..." /> -->
+            <!-- FASTAPI: <circle class="point-xgb" cx="760" cy="90" r="5" /> -->
+            <g class="chart-placeholder-msg">
+              <text x="415" y="108" text-anchor="middle">No prediction data yet</text>
+              <text x="415" y="126" text-anchor="middle" class="chart-placeholder-sub">Run a prediction to see this chart</text>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ RESULTS SECTION ============ -->
+    <section id="results-section">
+      <h2 class="section-title">Model Predictions</h2>
+      <p class="section-subtitle">Predicted direction and price on the target date, based on the selected forecast horizon.</p>
+
+      <div class="model-grid">
+
+        <!-- Random Forest -->
+        <article class="model-card model-card-rf" id="card-random-forest">
+          <header class="model-card-header">
+            <h3>Random Forest</h3>
+          </header>
+          <dl class="model-stats">
+            <div class="model-stat">
+              <dt>Predicted Direction</dt>
+              <!-- FASTAPI: response.random_forest.direction
+                   Add class "direction-up" or "direction-down" to this <dd>
+                   based on the response value to color it green/red.
+                   Same pattern applies to the LSTM and XGBoost direction
+                   fields, and to the matching comparison table cells. -->
+              <dd id="rf-direction">--</dd>
+            </div>
+            <div class="model-stat">
+              <dt>Predicted Price <span class="stat-note">(on target date)</span></dt>
+              <!-- FASTAPI: response.random_forest.predicted_price -->
+              <dd id="rf-price">--</dd>
+            </div>
+          </dl>
+        </article>
+
+        <!-- LSTM -->
+        <article class="model-card model-card-lstm" id="card-lstm">
+          <header class="model-card-header">
+            <h3>LSTM</h3>
+          </header>
+          <dl class="model-stats">
+            <div class="model-stat">
+              <dt>Predicted Direction</dt>
+              <!-- FASTAPI: response.lstm.direction -->
+              <dd id="lstm-direction">--</dd>
+            </div>
+            <div class="model-stat">
+              <dt>Predicted Price <span class="stat-note">(on target date)</span></dt>
+              <!-- FASTAPI: response.lstm.predicted_price -->
+              <dd id="lstm-price">--</dd>
+            </div>
+          </dl>
+        </article>
+
+        <!-- Third model: XGBoost -->
+        <article class="model-card model-card-xgb" id="card-xgboost">
+          <header class="model-card-header">
+            <h3>XGBoost</h3>
+          </header>
+          <dl class="model-stats">
+            <div class="model-stat">
+              <dt>Predicted Direction</dt>
+              <!-- FASTAPI: response.xgboost.direction -->
+              <dd id="xgb-direction">--</dd>
+            </div>
+            <div class="model-stat">
+              <dt>Predicted Price <span class="stat-note">(on target date)</span></dt>
+              <!-- FASTAPI: response.xgboost.predicted_price -->
+              <dd id="xgb-price">--</dd>
+            </div>
+          </dl>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============ COMPARISON SECTION ============ -->
+    <section id="comparison-section" class="panel">
+      <h2 class="panel-title">Model Comparison</h2>
+
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Predicted Price</th>
+              <th>Direction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Random Forest</td>
+              <!-- FASTAPI: mirror values from #rf-price / #rf-direction -->
+              <td id="cmp-rf-price">--</td>
+              <td id="cmp-rf-direction">--</td>
+            </tr>
+            <tr>
+              <td>LSTM</td>
+              <!-- FASTAPI: mirror values from #lstm-price / #lstm-direction -->
+              <td id="cmp-lstm-price">--</td>
+              <td id="cmp-lstm-direction">--</td>
+            </tr>
+            <tr>
+              <td>XGBoost</td>
+              <!-- FASTAPI: mirror values from #xgb-price / #xgb-direction -->
+              <td id="cmp-xgb-price">--</td>
+              <td id="cmp-xgb-direction">--</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="panel-title panel-title-spaced">Model Evaluation Metrics</h2>
+      <p class="section-subtitle">Test-set performance recorded when each model was trained.</p>
+
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Test MAE &darr;</th>
+              <th>Test MSE &darr;</th>
+              <th>Test RMSE &darr;</th>
+              <th>Test R&sup2; &uarr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Random Forest</td>
+              <td>0.1882</td>
+              <td>0.1495</td>
+              <td>0.3867</td>
+              <td>0.99934</td>
+            </tr>
+            <tr>
+              <td>XGBoost</td>
+              <td>0.2411</td>
+              <td>0.1862</td>
+              <td>0.4315</td>
+              <td>0.99918</td>
+            </tr>
+            <tr>
+              <td>LSTM</td>
+              <td>0.6465</td>
+              <td>1.5233</td>
+              <td>1.2342</td>
+              <td>0.9933</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Stock Market Prediction &mdash; student project</p>
+    </div>
+  </footer>
+
+  <!--
+    FASTAPI INTEGRATION POINT:
+    Add a script tag here (e.g. <script src="app.js"></script>) once you
+    build the JS that:
+      1. Listens for #prediction-form submit.
+      2. Sends symbol + horizon_days to your FastAPI endpoint.
+      3. Fills in all the "--" placeholders above with the JSON response.
+      4. Draws the three price charts using the response history + each
+         model's predicted point.
+  -->
+
+</body>
+</html>
