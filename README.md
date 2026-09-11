@@ -1,6 +1,4 @@
-Yes. Keep **everything in one `README.md` only** — no separate documentation files.
 
-Use this as the complete content of your repository's `README.md`:
 
 ````markdown
 # Stock Market Prediction AI
