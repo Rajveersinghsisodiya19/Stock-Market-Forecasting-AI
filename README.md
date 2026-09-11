@@ -1514,7 +1514,3 @@ http://localhost:5173
 
 Select a stock and generate the next-day prediction.
 
-```
-
-**One important correction before you publish it:** replace `YOUR-USERNAME` with your actual GitHub username, and make sure the `.env` location/name in the README matches what your `backend/main.py` actually loads. Also, if your repository has a `requirements.txt`, keep that as the authoritative dependency list; the README can still contain the manual install commands as a fallback.
-```
