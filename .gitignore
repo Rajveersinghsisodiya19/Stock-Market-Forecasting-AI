@@ -3,3 +3,4 @@ venv/
 test_lstm.py
 ml-env/
 .env
+claude/
