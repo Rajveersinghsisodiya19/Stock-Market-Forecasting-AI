@@ -2,7 +2,7 @@ from twelvedata import TDClient
 import pandas as pd
 import numpy as np
 
-td = TDClient(apikey="5e2d32211d6b4d35a4aeb7324192bc4d")
+td = TDClient(apikey="TWELVE_DATA_API_KEY")
 
 # 🇮🇳 Indian company
 

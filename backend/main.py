@@ -35,7 +35,6 @@ NEXT_DAY_HORIZON = 1
 # Same key used in Data creation and collection/historical_data.py
 TWELVE_DATA_API_KEY = os.getenv(
     "TWELVEDATA_API_KEY",
-    "5e2d32211d6b4d35a4aeb7324192bc4d",
 )
 
 app = FastAPI(title="Stock Market Prediction API")
